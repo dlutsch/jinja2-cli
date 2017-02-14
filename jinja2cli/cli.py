@@ -167,17 +167,19 @@ import jinja2
 from jinja2 import Environment, FileSystemLoader
 
 
-def render(template_path, data, extensions, strict=False):
+def render(template_path, data, extensions, strict=False, strip=False):
     env = Environment(
         loader=FileSystemLoader(os.path.dirname(template_path)),
         extensions=extensions,
-        keep_trailing_newline=True,
-        trim_blocks=True,
-        lstrip_blocks=True
+        keep_trailing_newline=True
     )
     if strict:
         from jinja2 import StrictUndefined
         env.undefined = StrictUndefined
+
+    if strip:
+        env.trim_blocks=True
+        env.lstrip_blocks=True
 
     # Add environ global
     env.globals['environ'] = os.environ.get
@@ -314,6 +316,10 @@ def main():
         '--strict',
         help='Disallow undefined variables to be used within the template',
         dest='strict', action='store_true')
+    parser.add_option(
+        '--strip',
+        help='Override default Jinja2 whitespace control, removing whitespace around command blocks',
+        dest='strip', action='store_true')
     opts, args = parser.parse_args()
 
     # Dedupe list
